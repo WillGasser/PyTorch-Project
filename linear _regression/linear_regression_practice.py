@@ -1,7 +1,6 @@
 import numpy as np
 import csv
 
-
 # Glossary:
 # 1 crime_rate: Per capita crime rate by town
 # 2 residential_zone: Proportion of residential land zoned for lots over 25,000 sq. ft.
@@ -21,7 +20,8 @@ import csv
 class Linear_Regression():
     def __init__(self, fileName: str) -> None:
         self.fileName = fileName
-        self.w1, self.w2 = np.random.randn(), np.random.randn() 
+        # Include the intercept term (w0)
+        self.w0, self.w1, self.w2 = np.random.randn(), np.random.randn(), np.random.randn()
     
     def buildData(self) -> None:
         with open(self.fileName, 'r') as file:
@@ -32,52 +32,52 @@ class Linear_Regression():
                 if i == 0:
                     i += 1
                     continue
-                
                 data.append(row)
             self.data = data
             self.training_examples = len(data)
 
-    
     def hypothesis(self, x1: float, x2: float) -> float:
-        return self.w1 * x1 + self.w2 * x2
+        return self.w0 + self.w1 * x1 + self.w2 * x2
     
     def gradient_descent(self, learning_rate: float, iterations: int) -> None:
         for _ in range(iterations):
-            w1_gradient, w2_gradient = 0, 0
+            # Initialize gradients for w0, w1, w2
+            w0_gradient, w1_gradient, w2_gradient = 0.0, 0.0, 0.0
             for row in self.data:
                 x1, x2 = float(row[6]), float(row[10])
                 y = float(row[14])
-                w1_gradient += (self.hypothesis(x1, x2) - y) * x1
-                w2_gradient += (self.hypothesis(x1, x2) - y) * x2
+                y_pred = self.hypothesis(x1, x2)
+                
+                # (y_pred - y) is the error
+                error = y_pred - y
+                
+                # Gradients
+                # w0_gradient sums (error * 1) because x0 = 1 for the intercept
+                w0_gradient += error
+                w1_gradient += error * x1
+                w2_gradient += error * x2
+
+            # Update weights
+            self.w0 -= (learning_rate / self.training_examples) * w0_gradient
             self.w1 -= (learning_rate / self.training_examples) * w1_gradient
             self.w2 -= (learning_rate / self.training_examples) * w2_gradient
         
-    def calculate_accuracy(self, num_samples: int = 100) -> None:
+    def calculate_accuracy(self) -> None:
         total_error = 0
-        for _ in range(num_samples):
-            row = self.data[np.random.randint(0, self.training_examples)]
+        for i in range(self.training_examples):
+            row = self.data[i]
             x1, x2 = float(row[6]), float(row[10])
             y_true = float(row[14])
             y_pred = self.hypothesis(x1, x2)
             error = abs((y_true - y_pred) / y_true) * 100
             total_error += error
 
-        average_error = total_error / num_samples
+        average_error = total_error / self.training_examples
         accuracy = 100 - average_error
         print(f"Accuracy: {accuracy:.2f}%")
-        
-    
-            
-        
-    
-    
+
+# Example usage:
 # test = Linear_Regression('Boston.csv')
 # test.buildData()
-
-# test.gradient_descent(0.00001,100000)
-test = Linear_Regression('Boston.csv')
-test.buildData()
-test.gradient_descent(0.00001, 5000)
-test.calculate_accuracy(1000)
-
-
+# test.gradient_descent(0.00001, 10000)
+# test.calculate_accuracy(1000)
