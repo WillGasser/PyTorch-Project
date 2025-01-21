@@ -51,19 +51,33 @@ class Linear_Regression():
                 w2_gradient += (self.hypothesis(x1, x2) - y) * x2
             self.w1 -= (learning_rate / self.training_examples) * w1_gradient
             self.w2 -= (learning_rate / self.training_examples) * w2_gradient
+        
+    def calculate_accuracy(self, num_samples: int = 100) -> None:
+        total_error = 0
+        for _ in range(num_samples):
+            row = self.data[np.random.randint(0, self.training_examples)]
+            x1, x2 = float(row[6]), float(row[10])
+            y_true = float(row[14])
+            y_pred = self.hypothesis(x1, x2)
+            error = abs((y_true - y_pred) / y_true) * 100
+            total_error += error
+
+        average_error = total_error / num_samples
+        accuracy = 100 - average_error
+        print(f"Accuracy: {accuracy:.2f}%")
+        
     
-    def predictRandom(self) -> None:
-        row = self.data[np.random.randint(0, self.training_examples)]
-        x1, x2 = float(row[6]), float(row[10])
-        print(f'Predicted: {self.hypothesis(x1, x2)}')
-        print(f'Actual: {row[14]}')
+            
         
     
     
+# test = Linear_Regression('Boston.csv')
+# test.buildData()
+
+# test.gradient_descent(0.00001,100000)
 test = Linear_Regression('Boston.csv')
 test.buildData()
+test.gradient_descent(0.00001, 5000)
+test.calculate_accuracy(1000)
 
-test.gradient_descent(0.00001,100000)
-
-test.predictRandom()
 
